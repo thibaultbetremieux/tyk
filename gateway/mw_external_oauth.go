@@ -80,6 +80,9 @@ func (k *ExternalOAuthMiddleware) ProcessRequest(w http.ResponseWriter, r *http.
 	}
 
 	if err != nil {
+        // Log the error before handling it
+        k.Logger().WithError(err).Error("Token validation failed during introspection")
+
 		switch {
 		case errors.Is(err, jwt.ErrSignatureInvalid), errors.Is(err, jwt.ErrTokenMalformed), errors.Is(err, jwt.ErrTokenNotValidYet),
 			errors.Is(err, jwt.ErrTokenUsedBeforeIssued), errors.Is(err, jwt.ErrTokenExpired):
@@ -229,7 +232,7 @@ func (k *ExternalOAuthMiddleware) introspection(accessToken string) (bool, strin
 		log.WithError(err).Debug("Doing OAuth introspection call")
 		claims, err = introspect(opts, accessToken)
 		if err != nil {
-			return false, "", fmt.Errorf("introspection err: %w", err)
+			return false, "", fmt.Errorf("introspection err: %s", err)
 		}
 
 		if opts.Cache.Enabled {
@@ -331,25 +334,32 @@ func introspect(opts apidef.Introspection, accessToken string) (jwt.MapClaims, e
 
 	res, err := http.Post(opts.URL, "application/x-www-form-urlencoded", strings.NewReader(body.Encode()))
 	if err != nil {
-		return nil, fmt.Errorf("error happened during the introspection call: %w", err)
+		return nil, fmt.Errorf("error happened during the introspection call: %s", err)
 	}
 
 	defer res.Body.Close()
 
 	bodyInBytes, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't read the introspection call response: %w", err)
+		return nil, fmt.Errorf("couldn't read the introspection call response: %s", err)
 	}
 
-	var claims jwt.MapClaims
-	err = json.Unmarshal(bodyInBytes, &claims)
-	if err != nil {
-		return nil, fmt.Errorf("couldn't unmarshal the introspection call response: %w", err)
-	}
+    // Print the response body for debugging
+    fmt.Println("Introspection response body:", string(bodyInBytes))
 
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("status does not indicate success: code: %d, body: %v", res.StatusCode, res.Body)
-	}
+    if res.StatusCode != http.StatusOK {
+        fmt.Println("Introspection call failed with status code:", res.StatusCode)
+        fmt.Println("Response body:", string(bodyInBytes))
+        return nil, fmt.Errorf("status does not indicate success: code: %d", res.StatusCode)
+    }
 
-	return claims, nil
+    var claims jwt.MapClaims
+    err = json.Unmarshal(bodyInBytes, &claims)
+    if err != nil {
+        fmt.Println("Couldn't unmarshal the introspection call response:", err)
+        fmt.Println("Response body:", string(bodyInBytes))
+        return nil, fmt.Errorf("couldn't unmarshal the introspection call response: %s", err)
+    }
+
+    return claims, nil
 }
