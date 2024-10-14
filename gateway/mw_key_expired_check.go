@@ -24,6 +24,7 @@ func (k *KeyExpired) ProcessRequest(w http.ResponseWriter, r *http.Request, _ in
 
 	logger := k.Logger()
 	session := ctxGetSession(r)
+	logger.Info(fmt.Sprintf("Session: %+v", session))
 	if session == nil {
 		return errors.New("Session state is missing or unset! Please make sure that auth headers are properly applied"), http.StatusBadRequest
 	}
