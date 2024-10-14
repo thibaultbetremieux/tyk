@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/TykTechnologies/tyk/request"
+	"fmt"
 )
 
 // KeyExpired middleware will check if the requesting key is expired or not. It makes use of the authManager to do so.
