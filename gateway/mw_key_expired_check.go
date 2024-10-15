@@ -19,6 +19,7 @@ func (k *KeyExpired) Name() string {
 
 // ProcessRequest will run any checks on the request on the way through the system, return an error to have the chain fail
 func (k *KeyExpired) ProcessRequest(w http.ResponseWriter, r *http.Request, _ interface{}) (error, int) {
+	logger := k.Logger()
 	session := ctxGetSession(r)
 	logger.Info(fmt.Sprintf("Session: %+v", session))
 
@@ -26,8 +27,6 @@ func (k *KeyExpired) ProcessRequest(w http.ResponseWriter, r *http.Request, _ in
 		return nil, http.StatusOK
 	}
 
-	logger := k.Logger()
-	session := ctxGetSession(r)
 	logger.Info(fmt.Sprintf("Session (after fail): %+v", session))
 	if session == nil {
 		return errors.New("Session state is missing or unset! Please make sure that auth headers are properly applied"), http.StatusBadRequest
