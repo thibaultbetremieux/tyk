@@ -3,6 +3,7 @@ package gateway
 import (
 	"errors"
 	"net/http"
+	"fmt"
 )
 
 // AccessRightsCheck is a middleware that will check if the key bing used to access the API has
