@@ -24,7 +24,7 @@ func (a *AccessRightsCheck) ProcessRequest(w http.ResponseWriter, r *http.Reques
 	}
 
 	session := ctxGetSession(r)
-	logger.info(session.AccessRights)
+	a.Logger().Info(session.AccessRights)
 
 	// If there's nothing in our profile, we let them through to the next phase
 	if len(session.AccessRights) == 0 {
