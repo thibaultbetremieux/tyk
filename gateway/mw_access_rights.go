@@ -2,7 +2,6 @@ package gateway
 
 import (
 	"errors"
-	logger "github.com/TykTechnologies/tyk/log"
 	"net/http"
 )
 
