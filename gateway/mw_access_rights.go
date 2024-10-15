@@ -2,8 +2,8 @@ package gateway
 
 import (
 	"errors"
+	logger "github.com/TykTechnologies/tyk/log"
 	"net/http"
-	"fmt"
 )
 
 // AccessRightsCheck is a middleware that will check if the key bing used to access the API has
@@ -24,6 +24,7 @@ func (a *AccessRightsCheck) ProcessRequest(w http.ResponseWriter, r *http.Reques
 	}
 
 	session := ctxGetSession(r)
+	logger.info(session.AccessRights)
 
 	// If there's nothing in our profile, we let them through to the next phase
 	if len(session.AccessRights) == 0 {
@@ -31,7 +32,6 @@ func (a *AccessRightsCheck) ProcessRequest(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Otherwise, run auth checks
-	fmt.Print(session.AccessRights)
 
 	versionList, apiExists := session.AccessRights[a.Spec.APIID]
 	if !apiExists {
