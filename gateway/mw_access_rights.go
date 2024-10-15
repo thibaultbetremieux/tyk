@@ -3,6 +3,7 @@ package gateway
 import (
 	"errors"
 	"net/http"
+	"fmt"
 )
 
 // AccessRightsCheck is a middleware that will check if the key bing used to access the API has
@@ -30,6 +31,8 @@ func (a *AccessRightsCheck) ProcessRequest(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Otherwise, run auth checks
+	fmt.Print(session.AccessRights)
+
 	versionList, apiExists := session.AccessRights[a.Spec.APIID]
 	if !apiExists {
 		a.Logger().Info("Attempted access to unauthorised API")
